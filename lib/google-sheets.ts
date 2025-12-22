@@ -134,6 +134,19 @@ export class GoogleSheetsService {
     console.log('All transactions cleared')
   }
 
+  // Reset wallet balance to default
+  resetWalletBalance(): void {
+    localStorage.removeItem('wallet-balance')
+    console.log('Wallet balance reset to default')
+  }
+
+  // Reset all data (wallet and transactions)
+  resetAllData(): void {
+    this.clearTransactions()
+    this.resetWalletBalance()
+    console.log('All data reset - wallet balance and transactions cleared')
+  }
+
   // Import data from Google Sheet manually
   importFromGoogleSheet(googleSheetData: Array<{amount: number, dateTime: string}>): void {
     const transactions: Transaction[] = googleSheetData.map(row => {
