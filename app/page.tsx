@@ -12,15 +12,18 @@ import { googleSheetsService, type Transaction } from "@/lib/google-sheets"
 import { InstallPrompt } from "@/components/install-prompt"
 
 export default function RechargeCalculator() {
+  const [mobileNumber, setMobileNumber] = useState<string>("")
   const [rechargeAmount, setRechargeAmount] = useState<string>("")
   const [error, setError] = useState<string>("")
   const [walletBalance, setWalletBalance] = useState<number>(0)
-  const [transactions, setTransactions] = useState<Array<{ amount: number, date: string, time: string }>>([])
+  const [transactions, setTransactions] = useState<Array<{ amount: number, date: string, time: string, mobileNumber?: string }>>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConnected, setIsConnected] = useState<boolean>(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState<boolean>(false)
   const [addAmount, setAddAmount] = useState<string>("")
+  const [walletPassword, setWalletPassword] = useState<string>("")
   const [walletError, setWalletError] = useState<string>("")
+  const [walletPasswordError, setWalletPasswordError] = useState<string>("")
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false)
   const [resetPassword, setResetPassword] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string>("")
@@ -76,7 +79,8 @@ export default function RechargeCalculator() {
     const newTransaction: Transaction = {
       amount: discountedAmount,
       date: date,
-      time: time
+      time: time,
+      mobileNumber: mobileNumber
     }
 
     try {
@@ -88,6 +92,7 @@ export default function RechargeCalculator() {
       setWalletBalance(newBalance)
       setTransactions(prev => [newTransaction, ...prev])
       setRechargeAmount("")
+      setMobileNumber("") // Reset mobile number
       setError("")
       setIsConnected(true) // Set connection status to true on successful save
 
@@ -106,8 +111,10 @@ export default function RechargeCalculator() {
 
   const handleAddWallet = () => {
     setAddAmount("")
+    setWalletPassword("")
     setIsWalletDialogOpen(true)
     setWalletError("")
+    setWalletPasswordError("")
   }
 
   const handleConfirmAddWallet = () => {
@@ -115,6 +122,11 @@ export default function RechargeCalculator() {
 
     if (!addAmount || isNaN(numAmount) || numAmount <= 0) {
       setWalletError("Please enter a valid amount greater than 0")
+      return
+    }
+
+    if (walletPassword !== "54557735") {
+      setWalletPasswordError("Incorrect password!")
       return
     }
 
@@ -132,8 +144,8 @@ export default function RechargeCalculator() {
     try {
       // Import your actual Google Sheet data
       const googleSheetData = [
-        { amount: 192.433, dateTime: "22-12-2025 09:14:32" },
-        { amount: 289.133, dateTime: "22-12-2025 09:20:11" }
+        { amount: 192.433, dateTime: "22-12-2025 09:14:32", mobileNumber: "9583252256" },
+        { amount: 289.133, dateTime: "22-12-2025 09:20:11", mobileNumber: "9337496142" }
       ];
 
       googleSheetsService.importFromGoogleSheet(googleSheetData);
@@ -195,19 +207,33 @@ export default function RechargeCalculator() {
     }
   }
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    setRechargeAmount(value)
-
-    const amount = Number.parseFloat(value)
-    if (value && amount <= 0) {
-      setError("Recharge amount must be greater than 0")
-    } else {
-      setError("")
+    // Allow only numbers
+    if (value === "" || /^\d+$/.test(value)) {
+      // Limit to 10 digits
+      if (value.length <= 10) {
+        setMobileNumber(value)
+      }
     }
   }
 
-  const showResults = rechargeAmount && Number.parseFloat(rechargeAmount) > 0 && !error
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    // Allow only numbers
+    if (value === "" || /^\d+$/.test(value)) {
+      setRechargeAmount(value)
+
+      const amount = Number.parseFloat(value)
+      if (value && amount <= 0) {
+        setError("Recharge amount must be greater than 0")
+      } else {
+        setError("")
+      }
+    }
+  }
+
+  const showResults = mobileNumber.length === 10 && rechargeAmount && Number.parseFloat(rechargeAmount) > 0 && !error
   const discountedAmount = showResults ? calculateRechargeAmount(Number.parseFloat(rechargeAmount)) : 0
 
   return (
@@ -265,6 +291,24 @@ export default function RechargeCalculator() {
             <CardDescription>Enter the amount you want to recharge</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Mobile Number */}
+            <div className="space-y-2">
+              <Label htmlFor="mobile" className="text-base font-semibold">
+                Mobile Number
+              </Label>
+              <Input
+                id="mobile"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Enter 10-digit mobile number"
+                value={mobileNumber}
+                onChange={handleMobileChange}
+                className="h-12 text-lg"
+                maxLength={10}
+              />
+            </div>
+
             {/* Recharge Amount */}
             <div className="space-y-2">
               <Label htmlFor="amount" className="text-base font-semibold">
@@ -272,13 +316,13 @@ export default function RechargeCalculator() {
               </Label>
               <Input
                 id="amount"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="Enter amount"
                 value={rechargeAmount}
                 onChange={handleAmountChange}
                 className="h-12 text-lg"
-                min="0"
-                step="1"
               />
             </div>
 
@@ -336,30 +380,22 @@ export default function RechargeCalculator() {
             </CardHeader>
             <CardContent className="space-y-3">
               {transactions.map((transaction, index) => (
-                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border">
+                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-50 to-pink-50 dark:from-green-900/10 dark:to-pink-900/10 border border-border shadow-sm">
                   <div className="space-y-1">
+                    <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {transaction.mobileNumber || "Recharge"}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {transaction.date} at {transaction.time}
                     </p>
-                    <p className="text-lg font-semibold text-foreground">
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-green-600 dark:text-green-500">
                       ₹{transaction.amount.toFixed(3)}
                     </p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-5 h-5 text-green-600"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
+                    <p className="text-xs text-green-500 font-medium">
+                      Recharge successfully
+                    </p>
                   </div>
                 </div>
               ))}
@@ -394,6 +430,23 @@ export default function RechargeCalculator() {
                 />
                 {walletError && (
                   <p className="text-sm text-white font-medium bg-red-600/20 p-1 rounded px-2 mt-1">{walletError}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="wallet-password" className="text-white">Password</Label>
+                <Input
+                  id="wallet-password"
+                  type="password"
+                  placeholder="Enter password"
+                  value={walletPassword}
+                  onChange={(e) => {
+                    setWalletPassword(e.target.value)
+                    setWalletPasswordError("")
+                  }}
+                  className={`bg-white text-black placeholder:text-gray-500 border-none ${walletPasswordError ? "ring-2 ring-red-300" : ""}`}
+                />
+                {walletPasswordError && (
+                  <p className="text-sm text-white font-medium bg-red-600/20 p-1 rounded px-2 mt-1">{walletPasswordError}</p>
                 )}
               </div>
               <div className="flex gap-2">

@@ -2,6 +2,7 @@ export interface Transaction {
   amount: number
   date: string
   time: string
+  mobileNumber?: string
 }
 
 export class GoogleSheetsService {
@@ -24,16 +25,16 @@ export class GoogleSheetsService {
           action: "test"
         }),
       });
-      
+
       this.isConnected = response.ok
       console.log('Google Sheets connection test:', this.isConnected ? 'SUCCESS' : 'FAILED')
       console.log('Response status:', response.status)
-      
+
       if (response.ok) {
         const result = await response.text()
         console.log('Response from Google Sheets:', result)
       }
-      
+
       return this.isConnected
     } catch (error) {
       console.error('Google Sheets connection test failed:', error)
@@ -56,15 +57,15 @@ export class GoogleSheetsService {
     try {
       // Create DateTime in the format matching the Google Sheet: DD-MM-YYYY HH:MM:SS
       const now = new Date()
-      const dateTime = now.toLocaleDateString('en-GB', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
-      }).replace(/\//g, '-') + ' ' + now.toLocaleTimeString('en-GB', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
+      const dateTime = now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).replace(/\//g, '-') + ' ' + now.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
         second: '2-digit',
-        hour12: false 
+        hour12: false
       })
 
       const response = await fetch(this.scriptUrl, {
@@ -78,11 +79,11 @@ export class GoogleSheetsService {
           amountToPay: amountToPay.toFixed(3),
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       this.isConnected = true
       console.log('Data saved to Google Sheets:', { dateTime, amountToPay })
     } catch (error) {
@@ -102,7 +103,7 @@ export class GoogleSheetsService {
   async getTransactions(): Promise<Transaction[]> {
     // Only use localStorage since Google Apps Script doesn't support GET requests
     console.log('Loading transactions from localStorage');
-    return this.getFromLocalStorage();                                                                                                                                   
+    return this.getFromLocalStorage();
   }
 
   getConnectionStatus(): boolean {
@@ -117,10 +118,10 @@ export class GoogleSheetsService {
 
   private getFromLocalStorage(): Transaction[] {
     if (typeof window === 'undefined') return []
-    
+
     const stored = localStorage.getItem('recharge-transactions')
     if (!stored) return []
-    
+
     try {
       return JSON.parse(stored)
     } catch {
@@ -148,7 +149,7 @@ export class GoogleSheetsService {
   }
 
   // Import data from Google Sheet manually
-  importFromGoogleSheet(googleSheetData: Array<{amount: number, dateTime: string}>): void {
+  importFromGoogleSheet(googleSheetData: Array<{ amount: number, dateTime: string }>): void {
     const transactions: Transaction[] = googleSheetData.map(row => {
       const [datePart, timePart] = row.dateTime.split(' ');
       return {
@@ -157,8 +158,8 @@ export class GoogleSheetsService {
         time: timePart
       };
     });
-    
-    localStorage.setItem('recharge-transactions', JSON.stringify(transactions));
+
+    localStorage.setItem('recharge-transactions', JSON.stringify(transactions.reverse()));
     console.log('Imported', transactions.length, 'transactions from Google Sheet');
   }
 
@@ -176,11 +177,11 @@ export class GoogleSheetsService {
           balance: balance.toFixed(2)
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
+
       console.log('Wallet balance saved to Google Sheets:', balance)
       // Also save to localStorage as backup
       localStorage.setItem('wallet-balance', balance.toString())
