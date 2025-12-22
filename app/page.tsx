@@ -14,7 +14,7 @@ export default function RechargeCalculator() {
   const [rechargeAmount, setRechargeAmount] = useState<string>("")
   const [error, setError] = useState<string>("")
   const [walletBalance, setWalletBalance] = useState<number>(0)
-  const [transactions, setTransactions] = useState<Array<{amount: number, date: string, time: string}>>([])
+  const [transactions, setTransactions] = useState<Array<{ amount: number, date: string, time: string }>>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConnected, setIsConnected] = useState<boolean>(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState<boolean>(false)
@@ -37,7 +37,7 @@ export default function RechargeCalculator() {
         const savedBalance = googleSheetsService.getWalletBalance()
         setWalletBalance(savedBalance)
         console.log('Wallet balance loaded:', savedBalance)
-        
+
         // Load transactions from localStorage
         const savedTransactions = await googleSheetsService.getTransactions()
         setTransactions(savedTransactions)
@@ -46,7 +46,7 @@ export default function RechargeCalculator() {
         console.error('Error loading data:', error)
       }
     }
-    
+
     loadData()
   }, [])
 
@@ -54,34 +54,34 @@ export default function RechargeCalculator() {
     setIsLoading(true)
     const amount = Number.parseFloat(rechargeAmount)
     const discountedAmount = calculateRechargeAmount(amount)
-    
+
     if (!rechargeAmount || amount <= 0) {
       setError("Please enter a valid recharge amount")
       setIsLoading(false)
       return
     }
-    
+
     if (discountedAmount > walletBalance) {
       setError("Insufficient wallet balance")
       setIsLoading(false)
       return
     }
-    
+
     // Create transaction record
     const now = new Date()
     const date = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
     const time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    
+
     const newTransaction: Transaction = {
       amount: discountedAmount,
       date: date,
       time: time
     }
-    
+
     try {
       // Save to Google Sheets
       await googleSheetsService.appendTransaction(newTransaction)
-      
+
       // Update wallet balance and add transaction
       const newBalance = walletBalance - discountedAmount
       setWalletBalance(newBalance)
@@ -89,10 +89,10 @@ export default function RechargeCalculator() {
       setRechargeAmount("")
       setError("")
       setIsConnected(true) // Set connection status to true on successful save
-      
+
       // Save updated wallet balance to localStorage
       localStorage.setItem('wallet-balance', newBalance.toString())
-      
+
       console.log("Recharge completed for amount:", discountedAmount)
     } catch (error) {
       console.error('Error saving transaction:', error)
@@ -105,26 +105,26 @@ export default function RechargeCalculator() {
 
   const handleAddWallet = () => {
     const amount = prompt("Enter amount to add to wallet:")
-    
+
     if (amount === null) {
       return // User cancelled
     }
-    
+
     const numAmount = Number.parseFloat(amount)
-    
+
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
       alert("Please enter a valid amount greater than 0")
       return
     }
-    
+
     const newBalance = walletBalance + numAmount
     setWalletBalance(newBalance)
-    
+
     // Save to localStorage only
     localStorage.setItem('wallet-balance', newBalance.toString())
-    
+
     console.log("Added to wallet:", numAmount)
-    
+
     // Show success message
     alert(`Successfully added ₹${numAmount.toFixed(2)} to wallet!`)
   }
@@ -136,9 +136,9 @@ export default function RechargeCalculator() {
         { amount: 192.433, dateTime: "22-12-2025 09:14:32" },
         { amount: 289.133, dateTime: "22-12-2025 09:20:11" }
       ];
-      
+
       googleSheetsService.importFromGoogleSheet(googleSheetData);
-      
+
       // Reload the transactions
       const refreshedTransactions = await googleSheetsService.getTransactions()
       setTransactions(refreshedTransactions)
@@ -150,8 +150,8 @@ export default function RechargeCalculator() {
 
   const handleCheckUrl = () => {
     const isValid = googleSheetsService.isUrlValid()
-    const message = isValid ? 
-      'Google Sheets URL is valid format' : 
+    const message = isValid ?
+      'Google Sheets URL is valid format' :
       'Google Sheets URL format is invalid'
     console.log('URL Check:', message)
     alert(message)
@@ -178,17 +178,17 @@ export default function RechargeCalculator() {
   const handleResetWithPassword = () => {
     if (resetPassword === "54557735") {
       googleSheetsService.resetAllData()
-      
+
       // Reset the UI state with wallet balance set to 0
       const zeroBalance = 0
       setWalletBalance(zeroBalance)
       setTransactions([])
       setRechargeAmount("")
       setError("")
-      
+
       // Save the zero balance to localStorage
       localStorage.setItem('wallet-balance', zeroBalance.toString())
-      
+
       setIsResetDialogOpen(false)
       alert('All data has been reset successfully!')
     } else {
@@ -218,7 +218,7 @@ export default function RechargeCalculator() {
         <div className="flex justify-center items-center space-y-2 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 p-4 sm:p-6 rounded-2xl">
           <div className="text-center">
             <h1 className="text-xl sm:text-2xl lg:text-5xl font-bold tracking-tight text-white animate-pulse">
-               KHERWAL BAZAAR
+              KHERWAL BAZAAR
             </h1>
             <p className="text-lg sm:text-1.5xl lg:text-2xl font-bold text-white">Recharge Calculator</p>
             <p className="text-sm sm:text-lg text-white/90">Enter amount to recharge instantly</p>
@@ -253,22 +253,7 @@ export default function RechargeCalculator() {
               </div>
               <Button size="sm" onClick={handleAddWallet}>Add wallet</Button>
               <Button size="sm" variant="destructive" onClick={handleResetData}>Reset Data</Button>
-              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-6 h-6 text-primary"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
-                  />
-                </svg>
-              </div>
+
             </div>
           </CardContent>
         </Card>
@@ -316,9 +301,9 @@ export default function RechargeCalculator() {
                 <p className="text-3xl font-bold text-primary">₹{discountedAmount.toFixed(3)}</p>
               </div>
 
-              <Button 
-                onClick={handleRecharge} 
-                className="w-full h-12 text-lg font-semibold" 
+              <Button
+                onClick={handleRecharge}
+                className="w-full h-12 text-lg font-semibold"
                 size="lg"
                 disabled={isLoading}
               >
@@ -347,9 +332,9 @@ export default function RechargeCalculator() {
                   <CardTitle className="text-2xl">Recharge History</CardTitle>
                   <CardDescription>Your recent successful recharges</CardDescription>
                 </div>
-                <Button 
-                  onClick={handleRefreshData} 
-                  size="sm" 
+                <Button
+                  onClick={handleRefreshData}
+                  size="sm"
                   variant="outline"
                   className="font-semibold"
                 >
@@ -389,7 +374,7 @@ export default function RechargeCalculator() {
             </CardContent>
           </Card>
         )}
-        
+
         {/* Reset Password Dialog */}
         <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
           <DialogContent className="sm:max-w-md">
