@@ -268,7 +268,7 @@ export default function RechargeCalculator() {
         </div>
       </div>
 
-      <div className="w-full max-w-sm sm:max-w-md space-y-4 sm:space-y-6 px-4">
+      <div className="w-full space-y-4 sm:space-y-6 px-4">
 
         <Card className="shadow-lg border-2 bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-6">
