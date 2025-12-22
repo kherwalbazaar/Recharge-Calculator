@@ -104,16 +104,16 @@ export default function RechargeCalculator() {
   }
 
   const handleAddWallet = () => {
-    const amount = prompt("Enter amount to add to wallet:")
+    setAddAmount("")
+    setIsWalletDialogOpen(true)
+    setWalletError("")
+  }
 
-    if (amount === null) {
-      return // User cancelled
-    }
+  const handleConfirmAddWallet = () => {
+    const numAmount = Number.parseFloat(addAmount)
 
-    const numAmount = Number.parseFloat(amount)
-
-    if (!amount || isNaN(numAmount) || numAmount <= 0) {
-      alert("Please enter a valid amount greater than 0")
+    if (!addAmount || isNaN(numAmount) || numAmount <= 0) {
+      setWalletError("Please enter a valid amount greater than 0")
       return
     }
 
@@ -124,9 +124,7 @@ export default function RechargeCalculator() {
     localStorage.setItem('wallet-balance', newBalance.toString())
 
     console.log("Added to wallet:", numAmount)
-
-    // Show success message
-    alert(`Successfully added ₹${numAmount.toFixed(2)} to wallet!`)
+    setIsWalletDialogOpen(false)
   }
 
   const handleRefreshData = async () => {
@@ -212,37 +210,38 @@ export default function RechargeCalculator() {
   const discountedAmount = showResults ? calculateRechargeAmount(Number.parseFloat(rechargeAmount)) : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex flex-col items-center justify-start p-2 sm:p-4 pt-0 sm:pt-0">
-      <div className="w-full max-w-sm sm:max-w-md space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex justify-center items-center space-y-2 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 p-4 sm:p-6 rounded-2xl">
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl lg:text-5xl font-bold tracking-tight text-white animate-pulse">
-              KHERWAL BAZAAR
-            </h1>
-            <p className="text-lg sm:text-1.5xl lg:text-2xl font-bold text-white">Recharge Calculator</p>
-            <p className="text-sm sm:text-lg text-white/90">Enter amount to recharge instantly</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex flex-col items-center justify-start pb-8">
+      {/* Header */}
+      <div className="w-full flex justify-center items-center space-y-2 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 p-4 sm:p-6 shadow-md mb-6">
+        <div className="text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-5xl font-bold tracking-tight text-white animate-pulse">
+            KHERWAL BAZAAR
+          </h1>
+          <p className="text-lg sm:text-1.5xl lg:text-2xl font-bold text-white">Recharge Calculator</p>
+          <p className="text-sm sm:text-lg text-white/90">Enter amount to recharge instantly</p>
 
-            <div className="flex items-center justify-center gap-2 sm:gap-4 pt-4 sm:pt-6">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 p-1">
-                <img src="/images/jio.jpg" alt="Jio" className="w-full h-full rounded-full object-cover" />
-              </div>
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-red-500 to-pink-400 p-1">
-                <img src="/images/art-p-9.jpg" alt="Airtel" className="w-full h-full rounded-full object-cover" />
-              </div>
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-purple-500 to-indigo-400 p-1">
-                <img src="/images/vi.jpg" alt="VI" className="w-full h-full rounded-full object-cover" />
-              </div>
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-orange-500 to-yellow-400 p-1">
-                <img
-                  src="/images/bsnl-app-transparent-logo-free-p.jpg"
-                  alt="BSNL"
-                  className="w-full h-full rounded-full object-cover"
-                />
-              </div>
+          <div className="flex items-center justify-center gap-2 sm:gap-4 pt-4 sm:pt-6">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 p-1">
+              <img src="/images/jio.jpg" alt="Jio" className="w-full h-full rounded-full object-cover" />
+            </div>
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-red-500 to-pink-400 p-1">
+              <img src="/images/art-p-9.jpg" alt="Airtel" className="w-full h-full rounded-full object-cover" />
+            </div>
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-purple-500 to-indigo-400 p-1">
+              <img src="/images/vi.jpg" alt="VI" className="w-full h-full rounded-full object-cover" />
+            </div>
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-orange-500 to-yellow-400 p-1">
+              <img
+                src="/images/bsnl-app-transparent-logo-free-p.jpg"
+                alt="BSNL"
+                className="w-full h-full rounded-full object-cover"
+              />
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="w-full max-w-sm sm:max-w-md space-y-4 sm:space-y-6 px-4">
 
         <Card className="shadow-lg border-2 bg-gradient-to-br from-primary/5 to-primary/10">
           <CardContent className="pt-6">
@@ -367,12 +366,53 @@ export default function RechargeCalculator() {
           </Card>
         )}
 
+        {/* Add Wallet Dialog */}
+        <Dialog open={isWalletDialogOpen} onOpenChange={setIsWalletDialogOpen}>
+          <DialogContent className="sm:max-w-md bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 border-none text-white">
+            <DialogHeader>
+              <DialogTitle className="text-white">Add to Wallet</DialogTitle>
+              <DialogDescription className="text-white/90">
+                Enter the amount you want to add to your wallet.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="wallet-amount">Amount (₹)</Label>
+                <Input
+                  id="wallet-amount"
+                  type="number"
+                  placeholder="Enter amount"
+                  value={addAmount}
+                  onChange={(e) => {
+                    setAddAmount(e.target.value)
+                    setWalletError("")
+                  }}
+                  className={`bg-white text-black placeholder:text-gray-500 border-none ${walletError ? "ring-2 ring-red-300" : ""}`}
+                  min="0"
+                  step="1"
+                />
+                {walletError && (
+                  <p className="text-sm text-white font-medium bg-red-600/20 p-1 rounded px-2 mt-1">{walletError}</p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleConfirmAddWallet} className="flex-1">
+                  Add Money
+                </Button>
+                <Button onClick={() => setIsWalletDialogOpen(false)} className="flex-1 bg-white text-red-500 hover:bg-gray-100 hover:text-red-600 border-none">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Reset Password Dialog */}
         <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md bg-gradient-to-br from-red-500 via-orange-500 to-yellow-500 border-none text-white">
             <DialogHeader>
-              <DialogTitle>Reset All Data</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-white">Reset All Data</DialogTitle>
+              <DialogDescription className="text-white/90">
                 Enter password to reset all data. This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
@@ -388,17 +428,17 @@ export default function RechargeCalculator() {
                     setResetPassword(e.target.value)
                     setPasswordError("")
                   }}
-                  className={passwordError ? "border-red-500" : ""}
+                  className={`bg-white text-black placeholder:text-gray-500 border-none ${passwordError ? "ring-2 ring-red-300" : ""}`}
                 />
                 {passwordError && (
-                  <p className="text-sm text-red-500">{passwordError}</p>
+                  <p className="text-sm text-white font-medium bg-red-600/20 p-1 rounded px-2 mt-1">{passwordError}</p>
                 )}
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleResetWithPassword} className="flex-1">
                   Reset Data
                 </Button>
-                <Button onClick={() => setIsResetDialogOpen(false)} variant="outline" className="flex-1">
+                <Button onClick={() => setIsResetDialogOpen(false)} className="flex-1 bg-white text-red-500 hover:bg-gray-100 hover:text-red-600 border-none">
                   Cancel
                 </Button>
               </div>
