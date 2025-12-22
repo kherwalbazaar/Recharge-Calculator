@@ -409,10 +409,10 @@ export default function RechargeCalculator() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-green-600 dark:text-green-500">
-                      ₹{transaction.amount.toFixed(3)}
+                    <p className={`text-xl font-bold ${transaction.type === 'credit' ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
+                      {transaction.type === 'credit' ? '+' : '-'}₹{transaction.amount.toFixed(3)}
                     </p>
-                    <p className="text-[10px] text-green-500 font-medium">
+                    <p className={`text-[10px] font-medium ${transaction.type === 'credit' ? 'text-green-500' : 'text-green-500'}`}>
                       {transaction.type === 'credit' ? "Money Added successfully" : "Recharge successfully"}
                     </p>
                   </div>
