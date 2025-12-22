@@ -16,7 +16,7 @@ export default function RechargeCalculator() {
   const [rechargeAmount, setRechargeAmount] = useState<string>("")
   const [error, setError] = useState<string>("")
   const [walletBalance, setWalletBalance] = useState<number>(0)
-  const [transactions, setTransactions] = useState<Array<{ amount: number, date: string, time: string, mobileNumber?: string }>>([])
+  const [transactions, setTransactions] = useState<Array<{ amount: number, date: string, time: string, mobileNumber?: string, type?: 'recharge' | 'credit' }>>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConnected, setIsConnected] = useState<boolean>(false)
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState<boolean>(false)
@@ -80,7 +80,8 @@ export default function RechargeCalculator() {
       amount: discountedAmount,
       date: date,
       time: time,
-      mobileNumber: mobileNumber
+      mobileNumber: mobileNumber,
+      type: 'recharge'
     }
 
     try {
@@ -136,6 +137,23 @@ export default function RechargeCalculator() {
     // Save to localStorage only
     localStorage.setItem('wallet-balance', newBalance.toString())
 
+    // Create transaction record for wallet add
+    const now = new Date()
+    const date = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+
+    const newTransaction: Transaction = {
+      amount: numAmount,
+      date: date,
+      time: time,
+      type: 'credit'
+    }
+
+    setTransactions(prev => [newTransaction, ...prev])
+
+    // Save transaction to localStorage
+    googleSheetsService.appendTransaction(newTransaction)
+
     console.log("Added to wallet:", numAmount)
     setIsWalletDialogOpen(false)
   }
@@ -144,8 +162,9 @@ export default function RechargeCalculator() {
     try {
       // Import your actual Google Sheet data
       const googleSheetData = [
-        { amount: 192.433, dateTime: "22-12-2025 09:14:32", mobileNumber: "9583252256" },
-        { amount: 289.133, dateTime: "22-12-2025 09:20:11", mobileNumber: "9337496142" }
+        { amount: 192.433, dateTime: "22-12-2025 09:14:32", mobileNumber: "9583252256", type: 'recharge' as const },
+        { amount: 500.000, dateTime: "22-12-2025 09:18:00", type: 'credit' as const },
+        { amount: 289.133, dateTime: "22-12-2025 09:20:11", mobileNumber: "9337496142", type: 'recharge' as const }
       ];
 
       googleSheetsService.importFromGoogleSheet(googleSheetData);
@@ -383,9 +402,9 @@ export default function RechargeCalculator() {
                 <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-50 to-pink-50 dark:from-green-900/10 dark:to-pink-900/10 border border-border shadow-sm">
                   <div className="space-y-1">
                     <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {transaction.mobileNumber || "Recharge"}
+                      {transaction.type === 'credit' ? "Wallet Money Added" : (transaction.mobileNumber || "Recharge")}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {transaction.date} at {transaction.time}
                     </p>
                   </div>
@@ -393,8 +412,8 @@ export default function RechargeCalculator() {
                     <p className="text-xl font-bold text-green-600 dark:text-green-500">
                       ₹{transaction.amount.toFixed(3)}
                     </p>
-                    <p className="text-xs text-green-500 font-medium">
-                      Recharge successfully
+                    <p className="text-[10px] text-green-500 font-medium">
+                      {transaction.type === 'credit' ? "Money Added successfully" : "Recharge successfully"}
                     </p>
                   </div>
                 </div>

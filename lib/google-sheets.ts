@@ -3,6 +3,7 @@ export interface Transaction {
   date: string
   time: string
   mobileNumber?: string
+  type?: 'recharge' | 'credit'
 }
 
 export class GoogleSheetsService {
