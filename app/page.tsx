@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { googleSheetsService, type Transaction } from "@/lib/google-sheets"
+import { InstallPrompt } from "@/components/install-prompt"
 
 export default function RechargeCalculator() {
   const [rechargeAmount, setRechargeAmount] = useState<string>("")
@@ -445,6 +446,9 @@ export default function RechargeCalculator() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* PWA Install Prompt */}
+        <InstallPrompt />
       </div>
     </div>
   )

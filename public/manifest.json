@@ -1,0 +1,21 @@
+{
+    "name": "RECHARGE",
+    "short_name": "RECHARGE",
+    "description": "Calculate recharge commission, GST, profit, and final payable amount instantly",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ef4444",
+    "icons": [
+        {
+            "src": "/recharge-icon.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/recharge-icon.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg"
+        }
+    ]
+}
