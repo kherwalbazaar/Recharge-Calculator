@@ -212,7 +212,7 @@ export default function RechargeCalculator() {
   const discountedAmount = showResults ? calculateRechargeAmount(Number.parseFloat(rechargeAmount)) : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex flex-col items-center justify-center p-2 sm:p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex flex-col items-center justify-start p-2 sm:p-4 pt-0 sm:pt-0">
       <div className="w-full max-w-sm sm:max-w-md space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex justify-center items-center space-y-2 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 p-4 sm:p-6 rounded-2xl">
@@ -313,15 +313,7 @@ export default function RechargeCalculator() {
           </Card>
         )}
 
-        {/* Footer Disclaimer */}
-        <Card className="border-dashed border-2 bg-muted/30">
-          <CardContent className="pt-6">
-            <p className="text-center text-sm text-muted-foreground">
-              <span className="font-semibold">Disclaimer:</span> This app is for calculation purposes only. No recharge
-              service is provided.
-            </p>
-          </CardContent>
-        </Card>
+
 
         {/* Recharge History */}
         {transactions.length > 0 && (
