@@ -150,13 +150,15 @@ export class GoogleSheetsService {
   }
 
   // Import data from Google Sheet manually
-  importFromGoogleSheet(googleSheetData: Array<{ amount: number, dateTime: string }>): void {
+  importFromGoogleSheet(googleSheetData: Array<{ amount: number, dateTime: string, mobileNumber?: string, type?: 'recharge' | 'credit' }>): void {
     const transactions: Transaction[] = googleSheetData.map(row => {
       const [datePart, timePart] = row.dateTime.split(' ');
       return {
         amount: row.amount,
         date: datePart,
-        time: timePart
+        time: timePart,
+        mobileNumber: row.mobileNumber,
+        type: row.type || (row.mobileNumber ? 'recharge' : 'credit')
       };
     });
 

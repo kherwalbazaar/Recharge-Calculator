@@ -160,21 +160,19 @@ export default function RechargeCalculator() {
 
   const handleRefreshData = async () => {
     try {
-      // Import your actual Google Sheet data
-      const googleSheetData = [
-        { amount: 192.433, dateTime: "22-12-2025 09:14:32", mobileNumber: "9583252256", type: 'recharge' as const },
-        { amount: 500.000, dateTime: "22-12-2025 09:18:00", type: 'credit' as const },
-        { amount: 289.133, dateTime: "22-12-2025 09:20:11", mobileNumber: "9337496142", type: 'recharge' as const }
-      ];
-
-      googleSheetsService.importFromGoogleSheet(googleSheetData);
-
-      // Reload the transactions
+      // Reload the transactions from localStorage
       const refreshedTransactions = await googleSheetsService.getTransactions()
       setTransactions(refreshedTransactions)
-      console.log('Data imported from Google Sheet')
+      
+      // Also reload wallet balance
+      const refreshedBalance = googleSheetsService.getWalletBalance()
+      setWalletBalance(refreshedBalance)
+      
+      console.log('Data refreshed successfully')
+      console.log('Transactions loaded:', refreshedTransactions.length)
+      console.log('Wallet balance:', refreshedBalance)
     } catch (error) {
-      console.error('Error importing data:', error)
+      console.error('Error refreshing data:', error)
     }
   }
 
@@ -402,7 +400,7 @@ export default function RechargeCalculator() {
                 <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-50 to-pink-50 dark:from-green-900/10 dark:to-pink-900/10 border border-border shadow-sm">
                   <div className="space-y-1">
                     <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {transaction.type === 'credit' ? "Wallet Money Added" : (transaction.mobileNumber || "Recharge")}
+                      {transaction.type === 'credit' ? "Wallet Money Added" : transaction.mobileNumber || "Mobile Number Not Available"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {transaction.date} at {transaction.time}
